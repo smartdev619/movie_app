@@ -1,25 +1,38 @@
-import logo from './logo.svg';
-import './App.css';
+import { createBrowserRouter } from 'react-router-dom';
+import {
+  RouterProvider,
+} from "react-router-dom";
+import HomePage from './pages/Homepage';
+import { MoviesContext, initialState } from './Context';
+import { Suspense, lazy, useState } from 'react';
+import { fetchMovieDetail, fetchMovies } from './utils/api';
+import { CircularProgress } from '@mui/material';
+import useContextHook from './Context/useContextHook';
+// import SearchPage from './pages/SearchPage';
 
-function App() {
+const MovieDetail = lazy(() => import('./pages/MovieDetail'));
+
+const App = createBrowserRouter([
+  {
+    path: "/",
+    element: <HomePage />,
+  },
+  {
+    path: "/movie/:id",
+    element: <MovieDetail />,
+  },
+]);
+
+const Wrapper = () => {
+  const { actions, contextValues } = useContextHook();
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <MoviesContext.Provider value={{ ...contextValues, actions }}>
+      <Suspense fallback={<CircularProgress />}>
+        <RouterProvider router={App} />
+      </Suspense>
+    </MoviesContext.Provider>
   );
 }
 
-export default App;
+export default Wrapper;
